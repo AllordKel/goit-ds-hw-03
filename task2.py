@@ -8,8 +8,8 @@ all_quotes_data = []
 all_authors_data = []
 url = "https://quotes.toscrape.com"
 
-for i in range(1,11):
-    page_url = f"{url}/page/{i}/"
+for page in range(1,11):
+    page_url = f"{url}/page/{page}/"
     response = requests.get(page_url)
     soup = BeautifulSoup(response.text, "lxml")
 
@@ -17,7 +17,9 @@ for i in range(1,11):
     authors = soup.find_all("small", class_="author")
     tags = soup.find_all("div", class_="tags")
 
-    for i in range(0, len(quotes)):
+    for i in range(len(quotes)):
+
+        #gathering data for qoutes file.
 
         clean_quote_tags = []
         tagsforquotes = tags[i].find_all('a', class_='tag')
@@ -32,8 +34,10 @@ for i in range(1,11):
 
         all_quotes_data.append(quotes_data)
         
-        if any(authors[i].text == author["fullname"] for author in all_authors_data):
-            continue
+        # gathering data for authors file
+
+        if any(authors[i].text == a["fullname"] for a in all_authors_data):
+            continue # if author already exist in authors collection - skip further activities
         
         author_description_link = authors[i].find_next_sibling("a")
         author_description_url = url + author_description_link["href"]
@@ -59,7 +63,7 @@ with open('qoutes.json', 'w', encoding='utf-8') as file:
 with open('authors.json', 'w', encoding='utf-8') as file:
     json.dump(all_authors_data, file, ensure_ascii=False, indent=4)
 
-#Uploading data from filees to MongoDB
+#Uploading data from files to MongoDB
 
 client = MongoClient(
     "mongodb+srv://<username>:<password>@allord.4d7ahvt.mongodb.net/?appName=Allord",
@@ -70,6 +74,9 @@ client = MongoClient(
 db = client["goit-ds-hw-03"]
 authors_collection = db["authors"]
 qoutes_collection = db["qoutes"]
+
+authors_collection.delete_many({})
+qoutes_collection.delete_many({})
 
 with open('authors.json', 'r', encoding='utf-8') as file:
     authors_data = json.load(file)
