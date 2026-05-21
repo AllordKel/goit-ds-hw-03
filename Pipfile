@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 pymongo = "*"
+lxml = "*"
+requests = "*"
+beautifulsoup4 = "*"
 
 [dev-packages]
 
